@@ -1,1 +1,1 @@
-6
+It is just for happy.
