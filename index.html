@@ -44,6 +44,7 @@
     </style>
 </head>
 <body>
+
     <p id="tell" style="position: absolute;"></p>
 
     <canvas id="canvas" width="450" height="706"></canvas>
@@ -343,16 +344,20 @@
         window.addEventListener("resize", resizesearch);
     </script>
 
-    <div id="icon"></div>
+    <div id="icon">
+        <img id="now" src="./icon/baidu.png" style="top: 5%;left: 5%;position: absolute;">
+    </div>
 
     <script type="text/javascript">
-        var icon = document.getElementById("icon");
+        var icon = document.getElementById("icon"),
+            now = document.getElementById("now");
 
         resizeicon();
 
         function resizeicon() {
             icon.style.width = (SearchTop * Goldenratio) + "px";
             icon.style.height = icon.style.width;
+            now.style.width = (parseFloat(icon.style.width) * 0.9) +"px";
 
             icon.style.top = (SearchTop - parseFloat(icon.style.height)) / 2 + "px";
             icon.style.left = ((window.innerWidth / 2) - (parseFloat(icon.style.width) / 2)) + "px";
@@ -403,8 +408,6 @@
             
         }
     </script>
-
-
 
 </body>
 </html>
