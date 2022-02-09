@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>wallpaper</title>
+    <title>title</title>
     <style type="text/css">
         #canvas {
             background:rgba(255,255,255,0);
@@ -12,9 +12,6 @@
             width: 100%;
             height: 100%;
             /*满屏*/
-
-            z-index: -1;
-            /*底层*/
         }
         #search{
             position: absolute;
@@ -38,24 +35,30 @@
             width: 100%;
             height: 100%;
         }
-        *{
-            
+        #background{
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            position: absolute;
+            z-index: -1;
         }
     </style>
     <link rel="shortcut icon" href="./icon/icon.png" type="image/x-icon">
 </head>
 <body>
+    <img src="./background.png" id="background">
 
     <p id="tell" style="position: absolute;"></p>
 
-    <canvas id="canvas" width="450" height="706"></canvas>
+    <canvas id="canvas"></canvas>
 
     <script type="text/javascript">
 
         (function (window) {
 
             var ctx,//画面
-                hue,
+                hue,//颜色
                 target = {},
                 tendrils = [],//须
                 settings = {};//设置
@@ -220,12 +223,8 @@
 
                 if (!ctx.running) return;
 
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = 'rgba(8,5,16,0.4)';
-                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                ctx.globalCompositeOperation = 'lighter';
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 ctx.strokeStyle = 'hsla(' + Math.round(hue.update()) + ',90%,50%,0.25)';
-                ctx.lineWidth = 1;
 
                 for (var i = 0, tendril; i < settings.trails; i++) {
                     tendril = tendrils[i];
@@ -284,6 +283,8 @@
 
                 ctx = document.getElementById('canvas').getContext('2d');
                 ctx.running = true;
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.lineWidth = 1;
 
                 hue = new Oscillator({
                     phase: Math.random() * Math.TWO_PI,
@@ -373,16 +374,13 @@
 
         function change() {
 
-
             if (changeon) {
                 search.style.top = SearchTop + "px";
                 changeon = 0;
-
                 resizelist();
             } else {
                 search.style.top = (window.innerHeight * Goldenratio) - (parseFloat(search.style.height) / 2) + "px";
                 changeon = 1;
-
                 resizelist();
             }
 
@@ -390,10 +388,13 @@
 
     </script>
 
-    <div id="list" style="height: 0px;"></div>
+    <div id="list" style="height: 0px;">
+    </div>
 
     <script>
         var list = document.getElementById("list");
+
+        window.addEventListener("resize",resizelist);
 
         function resizelist() {
             list.style.top = SearchTop + "px";
