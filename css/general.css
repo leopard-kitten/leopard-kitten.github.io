@@ -1,0 +1,15 @@
+body{
+    margin: 0 0 0 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(200deg,#bdb6ec,#87CEFA)
+}
+
+#MouseFollow {
+    background:rgba(255,255,255,0);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
