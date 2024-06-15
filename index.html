@@ -1,415 +1,49 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
-    <title>title</title>
-    <style type="text/css">
-        #canvas {
-            background:rgba(255,255,255,0);
-
-            position: absolute;
-            /*绝对定位*/
-
-            width: 100%;
-            height: 100%;
-            /*满屏*/
-        }
-        #search{
-            position: absolute;
-            border: 3px solid #a1a1a1;
-            padding: 0 0 0 10px;
-            opacity: 0.5;
-            outline-style: none ;
-            transition: all 0.75s ;
-        }
-        #icon,#list{
-            position: absolute ;
-            background-color: rgba(161,161,161,0.5);
-            cursor: pointer;
-            transition: all 0.75s ;
-        }
-        #icon:hover{
-            outline: solid rgb(255, 255, 255) 1px;
-        }
-        body{
-            margin: 0 0 0 0;
-            width: 100%;
-            height: 100%;
-        }
-        #background{
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            position: absolute;
-            z-index: -1;
-        }
-    </style>
-    <link rel="shortcut icon" href="./icon/icon.png" type="image/x-icon">
+    <title>new</title>
+    <link rel="stylesheet" href="./css/general.css">
+    <link rel="stylesheet" href="./css/background.css">
+    <link rel="stylesheet" href="./css/ball.css">
 </head>
 <body>
-    <img src="./background.png" id="background">
-
-    <p id="tell" style="position: absolute;"></p>
-
-    <canvas id="canvas"></canvas>
-
-    <script type="text/javascript">
-
-        (function (window) {
-
-            var ctx,//画面
-                hue,//颜色
-                target = {},
-                tendrils = [],//须
-                settings = {};//设置
-
-            settings.friction = 0.5;//摩擦力
-            settings.trails = 20;//生成量
-            settings.size = 50;//消失速度
-            settings.dampening = 0.25;//抑制的比例
-            settings.tension = 0.98;//张力
-
-            Math.TWO_PI = Math.PI * 2;
-
-            function Oscillator(options) {
-                this.init(options || {});
-            }
-
-            Oscillator.prototype = (function () {
-
-                var value = 0;
-
-                return {
-
-                    init: function (options) {
-                        this.phase = options.phase || 0;
-                        this.offset = options.offset || 0;
-                        this.frequency = options.frequency || 0.001;
-                        this.amplitude = options.amplitude || 1;
-                    },
-
-                    update: function () {
-                        this.phase += this.frequency;
-                        value = this.offset + Math.sin(this.phase) * this.amplitude;
-                        return value;
-                    },
-
-                    value: function () {
-                        return value;
-                    }
-                };
-
-            })();
-
-            function Tendril(options) {
-                this.init(options || {});
-            }
-
-            Tendril.prototype = (function () {
-
-                function Node() {
-                    this.x = 0;
-                    this.y = 0;
-                    this.vy = 0;
-                    this.vx = 0;
-                }
-
-                return {
-
-                    init: function (options) {
-
-                        this.spring = options.spring + (Math.random() * 0.1) - 0.05;
-                        this.friction = settings.friction + (Math.random() * 0.01) - 0.005;
-                        this.nodes = [];
-
-                        for (var i = 0, node; i < settings.size; i++) {
-
-                            node = new Node();
-                            node.x = target.x;
-                            node.y = target.y;
-
-                            this.nodes.push(node);
-                        }
-                    },
-
-                    update: function () {
-
-                        var spring = this.spring,
-                            node = this.nodes[0];
-
-                        node.vx += (target.x - node.x) * spring;
-                        node.vy += (target.y - node.y) * spring;
-
-                        for (var prev, i = 0, n = this.nodes.length; i < n; i++) {
-
-                            node = this.nodes[i];
-
-                            if (i > 0) {
-
-                                prev = this.nodes[i - 1];
-
-                                node.vx += (prev.x - node.x) * spring;
-                                node.vy += (prev.y - node.y) * spring;
-                                node.vx += prev.vx * settings.dampening;
-                                node.vy += prev.vy * settings.dampening;
-                            }
-
-                            node.vx *= this.friction;
-                            node.vy *= this.friction;
-                            node.x += node.vx;
-                            node.y += node.vy;
-
-                            spring *= settings.tension;
-                        }
-                    },
-
-                    draw: function () {
-
-                        var x = this.nodes[0].x,
-                            y = this.nodes[0].y,
-                            a, b;
-
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-
-                        for (var i = 1, n = this.nodes.length - 2; i < n; i++) {
-
-                            a = this.nodes[i];
-                            b = this.nodes[i + 1];
-                            x = (a.x + b.x) * 0.5;
-                            y = (a.y + b.y) * 0.5;
-
-                            ctx.quadraticCurveTo(a.x, a.y, x, y);
-                        }
-
-                        a = this.nodes[i];
-                        b = this.nodes[i + 1];
-
-                        ctx.quadraticCurveTo(a.x, a.y, b.x, b.y);
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
-                };
-
-            })();
-
-            function init(event) {
-
-                document.removeEventListener('mousemove', init);
-                document.removeEventListener('touchstart', init);
-
-                document.addEventListener('mousemove', mousemove);
-                document.addEventListener('touchmove', mousemove);
-                document.addEventListener('touchstart', touchstart);
-
-                mousemove(event);
-                reset();
-                loop();
-            }
-
-            function reset() {
-
-                tendrils = [];
-
-                for (var i = 0; i < settings.trails; i++) {
-
-                    tendrils.push(new Tendril({
-                        spring: 0.45 + 0.025 * (i / settings.trails)
-                    }));
-                }
-            }
-
-            function loop() {
-
-                if (!ctx.running) return;
-
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                ctx.strokeStyle = 'hsla(' + Math.round(hue.update()) + ',90%,50%,0.25)';
-
-                for (var i = 0, tendril; i < settings.trails; i++) {
-                    tendril = tendrils[i];
-                    tendril.update();
-                    tendril.draw();
-                }
-
-                requestAnimFrame(loop);
-            }
-
-            function resize() {
-                ctx.canvas.width = window.innerWidth;
-                ctx.canvas.height = window.innerHeight;
-            }
-            //适应窗口
-
-            function start() {
-                if (!ctx.running) {
-                    ctx.running = true;
-                    loop();
-                }
-            }
-            //开始
-
-            function stop() {
-                ctx.running = false;
-            }
-            //暂停
-
-            function mousemove(event) {
-                if (event.touches) {
-                    target.x = event.touches[0].pageX;
-                    target.y = event.touches[0].pageY;
-                } else {
-                    target.x = event.clientX
-                    target.y = event.clientY;
-                }
-                event.preventDefault();
-            }
-
-            function touchstart(event) {
-                if (event.touches.length == 1) {
-                    target.x = event.touches[0].pageX;
-                    target.y = event.touches[0].pageY;
-                }
-            }
-
-            window.requestAnimFrame = (function () {
-                return window.requestAnimationFrame ||
-                window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame ||
-                function (fn) { window.setTimeout(fn, 1000 / 60) };
-            })();
-
-            window.onload = function () {
-
-                ctx = document.getElementById('canvas').getContext('2d');
-                ctx.running = true;
-                ctx.globalCompositeOperation = 'lighter';
-                ctx.lineWidth = 1;
-
-                hue = new Oscillator({
-                    phase: Math.random() * Math.TWO_PI,
-                    amplitude: 85,
-                    frequency: 0.0015,
-                    offset: 285
-                });
-
-                document.addEventListener('mousemove', init);
-                document.addEventListener('touchstart', init);
-                document.body.addEventListener('orientationchange', resize);
-                window.addEventListener('resize', resize);
-
-                window.addEventListener('focus', start);//聚焦开始
-                window.addEventListener('blur', stop);//失焦暂停
-
-                resize();
-            };
-
-        })(window);
-
-    </script>
-
-    <input type="search" id="search" title="输入搜索内容">
-
-    <script type="text/javascript">
-        var search = document.getElementById("search"),
-            Goldenratio = (Math.sqrt(5) - 1)/2,
-            changeon = 0,
-            SearchTop;
-
-        resizesearch();
-
-        function find(event){
-            switch (event.keyCode) {
-                case 13:
-                    var a = search.value;
-                    window.open("https://www.baidu.com/s?wd=" + a);
-            }
-        }
-
-        search.addEventListener("keydown",find);
-
-        function resizesearch() {
-            search.style.width = (window.innerWidth * Goldenratio) + "px";
-            search.style.height = (window.innerHeight / 20) + "px";
-
-            search.style.left = ((window.innerWidth / 2) - (parseFloat(search.style.width) / 2)) + "px";
-
-            SearchTop = (window.innerHeight * (1 - Goldenratio)) - (parseFloat(search.style.height) / 2);
-
-            if (changeon) {
-                search.style.top = (window.innerHeight * Goldenratio) - (parseFloat(search.style.height) / 2) + "px";
-            } else {
-                search.style.top = SearchTop + "px";
-            };
-        }
-
-        window.addEventListener("resize", resizesearch);
-    </script>
-
-    <div id="icon">
-        <img id="now" src="./icon/icon.png" style="top: 5%;left: 5%;position: absolute;">
+    <script type="text/javascript" src="./js/linear.js"></script>
+
+    <canvas id="MouseFollow"></canvas>
+    <script type="text/javascript" src="./js/MouseFollow.js"></script>
+
+    <!-- background -->
+    <div class="square">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    <div class="circle">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
     </div>
 
-    <script type="text/javascript">
-        var icon = document.getElementById("icon"),
-            now = document.getElementById("now");
-
-        resizeicon();
-
-        function resizeicon() {
-            icon.style.width = (SearchTop * Goldenratio) + "px";
-            icon.style.height = icon.style.width;
-            now.style.width = (parseFloat(icon.style.width) * 0.9) +"px";
-
-            icon.style.top = (SearchTop - parseFloat(icon.style.height)) / 2 + "px";
-            icon.style.left = ((window.innerWidth / 2) - (parseFloat(icon.style.width) / 2)) + "px";
-        }
-
-        window.addEventListener("resize", resizeicon);
-
-    </script>
-
-    <script>
-        icon.addEventListener("click",change);
-
-        function change() {
-
-            if (changeon) {
-                search.style.top = SearchTop + "px";
-                changeon = 0;
-                resizelist();
-            } else {
-                search.style.top = (window.innerHeight * Goldenratio) - (parseFloat(search.style.height) / 2) + "px";
-                changeon = 1;
-                resizelist();
-            }
-
-        }
-
-    </script>
-
-    <div id="list" style="height: 0px;">
+    <!-- ball -->
+    <div class="shell">
+        <div class="box">
+            <div class="ball"></div>
+            <div class="shadow"></div>
+        </div>
+        <div class="box">
+            <div class="ball"></div>
+            <div class="shadow"></div>
+        </div> <div class="box">
+            <div class="ball"></div>
+        </div>
     </div>
-
-    <script>
-        var list = document.getElementById("list");
-
-        window.addEventListener("resize",resizelist);
-
-        function resizelist() {
-            list.style.top = SearchTop + "px";
-            list.style.left = search.style.left;
-
-            list.style.width = search.style.width;
-
-            if (changeon) {
-                list.style.height = (parseFloat(search.style.height) * 4.5) + "px";
-            } else {
-                list.style.height = 0 + "px";
-            }
-            
-        }
-    </script>
-
 </body>
 </html>
