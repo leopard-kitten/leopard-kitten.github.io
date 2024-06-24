@@ -2,10 +2,12 @@ body{
     margin: 0 0 0 0;
     width: 100%;
     height: 100vh;
-    background: linear-gradient(200deg,#87CEFA,#bdb6ec);
+    background: linear-gradient(200deg,#bdb6ec,#87CEFA);
     display: flex;
     flex-direction: column;
     justify-content:center;
+    align-items: center;
+    user-select: none;
 }
 
 .glass{
@@ -20,6 +22,7 @@ body{
 }
 
 .level-container{
+    width: 100%;
     display: flex;
     justify-content:center;
 }
@@ -41,21 +44,56 @@ body{
 }
 
 #search-container{
-    flex-basis: 15%;
+    flex-basis: 20%;
 }
 
 #search{
     text-align: left;
     width: 55%;
-    height: 30px;
+    height: 40px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    font-family:inherit;
 }
 
 #search:focus{
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.8);
     border-width: 1px;
     outline: 0;
 }
 
+input[type=search]::-webkit-search-cancel-button{
+    -webkit-appearance: none;
+}
+
 #path-container{
+    width: 60%;
+    height: 20%;
     flex-basis: 25%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.path{
+    height: 10vw;
+    width: 10vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.path:hover{
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.8);
+    border-width: 1px;
+}
+
+.path > img{
+    width: 40%;
+    height: 40%;
+}
+
+img:not([src]){
+    opacity:0;
 }
