@@ -5,10 +5,9 @@
     <link rel="stylesheet" href="./css/general.css">
     <link rel="stylesheet" href="./css/background.css">
     <link rel="stylesheet" href="./css/ball.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 </head>
 <body>
-    <script type="text/javascript" src="./js/linear.js"></script>
-
     <canvas id="MouseFollow"></canvas>
     <script type="text/javascript" src="./js/MouseFollow.js"></script>
 
@@ -49,9 +48,14 @@
     </div>
 
     <div class="level-container" id="search-container">
-        <input id="search" class="glass">
+        <input id="search" class="glass" type="search">
     </div>
+    <script type="text/javascript" src="./js/input.js"></script>
 
-    <div class="level-container" id="path-container"></div>
-</body>
+    <div class="level-container" id="path-container">
+        <a class="glass path" href="https://www.bilibili.com/" target="_self"></a>
+        <a class="glass path" href="https://www.baidu.com" target="_self"></a>
+        <a class="glass path" href="https://github.com/" target="_self"></a>
+    </div>
+    <script type="text/javascript" src="./js/a.js"></script>
 </html>
